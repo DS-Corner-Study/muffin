@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,10 +44,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByUpdatedAtNotNull();
     List<Product> findByUpdatedAtIsNotNull();
 
-    Product findByisActiveTrue();
-    Product findByisActiveIsTrue();
-    Product findByisActiveFalse();
-    Product findByisActiveIsFalse();
+//    Product findByisActiveTrue();
+//    Product findByisActiveIsTrue();
+//    Product findByisActiveFalse();
+//    Product findByisActiveIsFalse();
 
     Product findByNumberAndName(Long number, String name);
     Product findByNumberOrName(Long number, String name);
@@ -85,4 +87,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 페이징 처리를 위한 쿼리 메서드
     Page<Product> findByName(String name, Pageable pageable);
+
+    @Query("SELECT p FROM Product AS p WHERE p.name = ?1")
+    List<Product> findByName(String name);
+
+    @Query("SELECT p FROM Product AS p WHERE p.name = :name")
+    List<Product> findByNameParam(@Param("name") String name);
+
+    // 특정 컬럼만 추출하는 쿼리
+    @Query("SELECT p.name, p.price, p.stock FROM Product p WHERE p.name = :name")
+    List<Object[]> findByNameParam2(@Param("name") String name);
 }

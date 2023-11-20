@@ -1,6 +1,10 @@
 package com.springboot.jpa.data.repository;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.springboot.jpa.data.entity.Product;
+import com.springboot.jpa.data.entity.QProduct;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,13 +12,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @SpringBootTest
 public class ProductRepositoryTest0 {
 
     @Autowired
     ProductRepository productRepository;
+
+    @PersistenceContext
+    EntityManager entityManager;
+
+    @Autowired
+    JPAQueryFactory jpaQueryFactory;
 
     @Test
     void sortingAndPagingTest() {
@@ -57,6 +70,105 @@ public class ProductRepositoryTest0 {
                 Sort.Order.asc("price"),
                 Sort.Order.desc("stock")
         );
+    }
+
+    @Test
+    void queryDslTest() {
+        JPAQuery<Product> query = new JPAQuery(entityManager);
+
+        QProduct qProduct = QProduct.product;
+
+        List<Product> productList = query
+                .from(qProduct)
+                .where(qProduct.name.eq("펜"))
+                .orderBy(qProduct.price.asc())
+                .fetch();
+
+        for (Product product : productList) {
+            System.out.println("----------------");
+            System.out.println();
+            System.out.println("Product Number : " + product.getNumber());
+            System.out.println("Product Name : " + product.getName());
+            System.out.println("Product Price : " + product.getPrice());
+            System.out.println("Product Stock : " + product.getStock());
+            System.out.println();
+            System.out.println("----------------");
+        }
+    }
+
+    @Test
+    void queryDslTest2() {
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
+        QProduct qProduct = QProduct.product;
+
+        List<Product> productList = jpaQueryFactory.selectFrom(qProduct)
+                .where(qProduct.name.eq("펜"))
+                .orderBy(qProduct.price.asc())
+                .fetch();
+
+        for (Product product : productList) {
+            System.out.println("----------------");
+            System.out.println();
+            System.out.println("Product Number : " + product.getNumber());
+            System.out.println("Product Name : " + product.getName());
+            System.out.println("Product Price : " + product.getPrice());
+            System.out.println("Product Stock : " + product.getStock());
+            System.out.println();
+            System.out.println("----------------");
+        }
+    }
+
+    @Test
+    void queryDslTest3() {
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
+        QProduct qProduct = QProduct.product;
+
+        // select 대상이 하나인 경우
+        List<String> productList = jpaQueryFactory
+                .select(qProduct.name)
+                .from(qProduct)
+                .where(qProduct.name.eq("펜"))
+                .orderBy(qProduct.price.asc())
+                .fetch();
+
+        for (String product : productList) {
+            System.out.println("----------------");
+            System.out.println("Product Name : " + product);
+            System.out.println("----------------");
+        }
+
+        // select 대상이 여러 개일 경우 (,)로 구분해서 작성
+        List<Tuple> tupleList = jpaQueryFactory
+                .select(qProduct.name, qProduct.price)
+                .from(qProduct)
+                .where(qProduct.name.eq("펜"))
+                .orderBy(qProduct.price.asc())
+                .fetch();
+
+        for (Tuple product : tupleList) {
+            System.out.println("----------------");
+            System.out.println("Product Name : " + product.get(qProduct.name));
+            System.out.println("Product Name : " + product.get(qProduct.price));
+            System.out.println("----------------");
+        }
+    }
+
+    @Test
+    void queryDSLTest4() {
+        QProduct qProduct = QProduct.product;
+
+        List<String> productList = jpaQueryFactory
+                .select(qProduct.name)
+                .from(qProduct)
+                .where(qProduct.name.eq("펜"))
+                .orderBy(qProduct.price.asc())
+                .fetch();
+
+        for (String product : productList) {
+            System.out.println("----------------");
+            System.out.println("Product Name : " + product);
+            System.out.println("----------------");
+        }
     }
 
 }
