@@ -43,7 +43,7 @@ public class SecurityConfig //extends WebSecurityConfigurerAdapter
 //                    )
 
                     .authorizeHttpRequests((authorizeRequests) ->
-                            authorizeRequests.requestMatchers("/user/**").authenticated()
+                            authorizeRequests.requestMatchers("/user/**").authenticated() // 인증만 되면 들어갈 수 있는 주소
                                     .requestMatchers("/manager/**").hasAnyRole("ADMIN","MANAGER")
                                     .requestMatchers("/admin/**").hasRole("ADMIN")
                                     .anyRequest().permitAll()
@@ -51,7 +51,8 @@ public class SecurityConfig //extends WebSecurityConfigurerAdapter
                     )
                     .formLogin(login -> login
                             .loginPage("/loginForm")
-                            .defaultSuccessUrl("/index", true)
+                            .loginProcessingUrl("/login") // /login 주소가 호출이 되면 시큐리티가 낚아채서 대신 로그인을 진행해줌
+                            .defaultSuccessUrl("/")
                             .permitAll())
             ;
 
